@@ -28,9 +28,9 @@ class File(db.Model):
     __tablename__ = 'files'
 
     id = db.Column(db.Integer, primary_key=True)
-    filename_original = db.Column(db.String(255), nullable=False) # Имя, которое было у пользователя
-    filename_saved = db.Column(db.String(255), nullable=False)    # Уникальное имя на сервере
-    file_size = db.Column(db.Integer, nullable=False)             # Размер в байтах
+    filename_original = db.Column(db.String(255), nullable=False)
+    filename_saved = db.Column(db.String(255), nullable=False)
+    file_size = db.Column(db.Integer, nullable=False)     
     upload_date = db.Column(db.DateTime, default=datetime.utcnow)
     
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
