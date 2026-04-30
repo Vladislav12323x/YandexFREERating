@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3 text-center">
+    <h1 class="display-5 fw-bold">Добро пожаловать в CloudShare</h1>
+    <p class="col-md-8 fs-4 mx-auto">Безопасный сервис для хранения и обмена файлами. Зарегистрируйтесь, чтобы начать.</p>
+    {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('main.register') }}" class="btn btn-primary btn-lg">Начать</a>
+    {% else %}
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-success btn-lg">Перейти в кабинет</a>
+    {% endif %}
+</div>
+{% endblock %}
