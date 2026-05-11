@@ -20,14 +20,14 @@
             <td>{{ file.filename_original }}</td>
             <td>{{ (file.file_size / 1024) | round(2) }}</td>
             <td>
-                {% if file.access_type == 'private' %}
-                    <span class="badge bg-secondary">🔒 Приватный</span>
-                {% else %}
+                {% if file.access_type == 'link' %}
                     <span class="badge bg-info text-dark">🔗 По ссылке</span>
-                    <button class="btn btn-sm btn-outline-primary copy-link" 
-                            data-url="{{ url_for('main.download_shared_file', token=file.share_token, _external=True) }}">
-                        Копировать ссылку
+                    <button class="btn btn-sm btn-outline-primary copy-link-btn ms-1" 
+                    data-url="{{ url_for('main.download_shared_file', token=file.share_token, _external=True) }}">
+                    📋 Копировать
                     </button>
+                {% else %}
+                    <span class="badge bg-secondary">🔒 Приватный</span>
                 {% endif %}
             </td>
             <td>{{ file.upload_date.strftime('%Y-%m-%d %H:%M') }}</td>
@@ -47,6 +47,7 @@
 
 {% block scripts %}
 <script>
+
 document.querySelectorAll('.copy-link').forEach(button => {
     button.addEventListener('click', function() {
         const url = this.getAttribute('data-url');
