@@ -10,6 +10,24 @@
                         <label class="form-label">Выберите файл</label>
                         <input type="file" name="file" class="form-control" required>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Доступ к файлу</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="access_type" 
+                                   id="access_private" value="private" checked>
+                            <label class="form-check-label" for="access_private">
+                                🔒 Приватный (только я)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="access_type" 
+                                   id="access_link" value="link">
+                            <label class="form-check-label" for="access_link">
+                                🔗 По ссылке (любой с ссылкой может скачать)
+                            </label>
+                        </div>
+                    </div>
+                    
                     <button type="submit" class="btn btn-primary">Загрузить</button>
                     <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Отмена</a>
                 </form>

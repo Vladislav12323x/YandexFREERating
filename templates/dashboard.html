@@ -9,6 +9,7 @@
         <tr>
             <th>Имя файла</th>
             <th>Размер (КБ)</th>
+            <th>Доступ</th>
             <th>Дата загрузки</th>
             <th>Действия</th>
         </tr>
@@ -17,11 +18,22 @@
         {% for file in files %}
         <tr>
             <td>{{ file.filename_original }}</td>
-            <button class="btn btn-sm btn-danger delete-btn" data-id="{{ file.id }}">Удалить</button>
             <td>{{ (file.file_size / 1024) | round(2) }}</td>
+            <td>
+                {% if file.access_type == 'private' %}
+                    <span class="badge bg-secondary">🔒 Приватный</span>
+                {% else %}
+                    <span class="badge bg-info text-dark">🔗 По ссылке</span>
+                    <button class="btn btn-sm btn-outline-primary copy-link" 
+                            data-url="{{ url_for('main.download_shared_file', token=file.share_token, _external=True) }}">
+                        Копировать ссылку
+                    </button>
+                {% endif %}
+            </td>
             <td>{{ file.upload_date.strftime('%Y-%m-%d %H:%M') }}</td>
             <td>
-                <a href="{{ url_for('main.download_file', filename=file.filename_saved) }}" class="btn btn-sm btn-primary">Скачать</a>
+                <a href="{{ url_for('main.download_file', filename=file.filename_saved) }}" 
+                   class="btn btn-sm btn-primary">Скачать</a>
                 <button class="btn btn-sm btn-danger delete-btn" data-id="{{ file.id }}">Удалить</button>
             </td>
         </tr>
@@ -31,4 +43,23 @@
 {% else %}
 <p class="text-muted">У вас пока нет загруженных файлов.</p>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.copy-link').forEach(button => {
+    button.addEventListener('click', function() {
+        const url = this.getAttribute('data-url');
+        navigator.clipboard.writeText(url).then(() => {
+            const originalText = this.textContent;
+            this.textContent = 'Скопировано!';
+            this.classList.replace('btn-outline-primary', 'btn-success');
+            setTimeout(() => {
+                this.textContent = originalText;
+                this.classList.replace('btn-success', 'btn-outline-primary');
+            }, 2000);
+        });
+    });
+});
+</script>
 {% endblock %}
