@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from models import db, User, File
-from utils import allowed_file
+from utils import allowed_file, allowed_avatar
 
 main_bp = Blueprint('main', __name__)
 
@@ -78,6 +78,59 @@ def dashboard():
     return render_template('dashboard.html', files=files)
 
 
+@main_bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        avatar_file = request.files.get('avatar')
+
+        if email != current_user.email:
+            existing_user = User.query.filter_by(email=email).first()
+            if existing_user:
+                flash('Этот email уже занят.', 'danger')
+                return redirect(url_for('main.profile'))
+            current_user.email = email
+
+        if avatar_file and avatar_file.filename != '':
+            if allowed_avatar(avatar_file.filename):
+                _, ext_with_dot = os.path.splitext(avatar_file.filename)
+                ext = ext_with_dot.lower().lstrip('.')
+
+                avatar_name = f"avatar_{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
+
+                avatar_dir = os.path.join(current_app.root_path, 'static', 'avatars')
+                if not os.path.exists(avatar_dir):
+                    os.makedirs(avatar_dir)
+
+                save_path = os.path.join(avatar_dir, avatar_name)
+                avatar_file.save(save_path)
+
+                if current_user.avatar_filename != 'default_avatar.png':
+                    old_avatar_path = os.path.join(avatar_dir, current_user.avatar_filename)
+                    if os.path.exists(old_avatar_path):
+                        try:
+                            os.remove(old_avatar_path)
+                        except Exception:
+                            pass
+
+                current_user.avatar_filename = avatar_name
+            else:
+                flash('Недопустимый формат изображения для аватарки.', 'danger')
+                return redirect(url_for('main.profile'))
+
+        try:
+            db.session.commit()
+            flash('Профиль успешно обновлен!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash('Ошибка при сохранении профиля.', 'danger')
+
+        return redirect(url_for('main.profile'))
+
+    return render_template('profile.html')
+
+
 @main_bp.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload_file():
@@ -93,8 +146,10 @@ def upload_file():
             return redirect(request.url)
 
         if file and allowed_file(file.filename):
-            original_name = secure_filename(file.filename)
-            ext = original_name.rsplit('.', 1)[1].lower()
+            raw_filename = file.filename
+            _, ext_with_dot = os.path.splitext(raw_filename)
+            ext = ext_with_dot.lower().lstrip('.')
+
             unique_name = f"{uuid.uuid4().hex}.{ext}"
 
             save_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_name)
@@ -104,7 +159,7 @@ def upload_file():
             access_type = request.form.get('access_type', 'private')
 
             new_file = File(
-                filename_original=original_name,
+                filename_original=raw_filename,
                 filename_saved=unique_name,
                 file_size=file_size,
                 user_id=current_user.id,

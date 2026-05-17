@@ -19,6 +19,7 @@
                     {% if current_user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Мои файлы</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('main.upload_file') }}">Загрузить</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.profile') }}">Профиль</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('main.logout') }}">Выход ({{ current_user.username }})</a></li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('main.login') }}">Вход</a></li>

@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    avatar_filename = db.Column(db.String(255), nullable=False, default='default_avatar.png')
     files = db.relationship('File', backref='owner', lazy='dynamic', cascade='all, delete-orphan')
 
     def set_password(self, password):
